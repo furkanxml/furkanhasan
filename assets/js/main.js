@@ -280,6 +280,8 @@
        düzen hazır olduktan sonra o bölüme gidilir. */
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     ScrollTrigger.clearScrollMemory('manual');
+    // Telefonda adres çubuğu açılıp kapanınca ölçüleri yeniden hesaplama (sayfa zıplamasın)
+    ScrollTrigger.config({ ignoreMobileResize: true });
     var navEntry = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
     var isReload = navEntry && navEntry.type === 'reload';
     var pendingTarget = null;
@@ -296,8 +298,13 @@
     });
 
     /* ---------- Yumuşak kaydırma ---------- */
+    // Telefon/tablette tarayıcının kendi kaydırması en akıcısıdır; Lenis yalnızca
+    // fare kullanılan cihazlarda açılır (dokunmatikte sabit öğelerin kaymasını önler).
+    // Dokunmatik cihaz mı? (telefon/tablet: fare yok)
+    var isTouch = !matchMedia('(hover: hover) and (pointer: fine)').matches;
+
     var lenis = null;
-    if (window.Lenis) {
+    if (window.Lenis && !isTouch) {
         lenis = new Lenis({ lerp: 0.09 });
         window.__lenis = lenis;
         lenis.on('scroll', ScrollTrigger.update);
@@ -307,8 +314,9 @@
 
     function scrollToTarget(target, immediate) {
         if (!lenis) {
-            if (target === 0) window.scrollTo(0, 0);
-            else target.scrollIntoView();
+            var behavior = immediate ? 'auto' : 'smooth';
+            if (target === 0) window.scrollTo({ top: 0, behavior: behavior });
+            else target.scrollIntoView({ behavior: behavior });
             return;
         }
         lenis.scrollTo(target, {
@@ -346,26 +354,24 @@
     var heroFades = document.querySelectorAll('[data-hero-fade]');
     var heroPhoto = document.querySelector('.hero__photo');
     var intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    var showLoader = false;
-
-    if (loader && !pendingTarget) {
-        try {
-            showLoader = sessionStorage.getItem('intro-seen') !== '1';
-            sessionStorage.setItem('intro-seen', '1');
-        } catch (err) {
-            showLoader = true;
-        }
-    }
+    // Açılış efekti her girişte oynar; yalnızca başka sayfadan bir bölüme
+    // (ör. index.html#hakkimda) gelinirken atlanır.
+    var showLoader = !!loader && !pendingTarget;
 
     if (loader && showLoader) {
+        // Açılış bitene kadar sayfa kaydırılamaz
         if (lenis) lenis.stop();
+        root.style.overflow = 'hidden';
         var loaderChars = loader.querySelectorAll('.ch');
         intro
             .from(loaderChars, { yPercent: 110, stagger: 0.05, duration: 1 })
             .to(loaderChars, { yPercent: -110, stagger: 0.03, duration: 0.6, ease: 'expo.in' }, '+=0.2')
             .to(loader, { yPercent: -100, duration: 1, ease: 'expo.inOut' }, '-=0.25')
             .set(loader, { display: 'none' })
-            .call(function () { if (lenis) lenis.start(); });
+            .call(function () {
+                root.style.overflow = '';
+                if (lenis) lenis.start();
+            });
     } else if (loader) {
         loader.style.display = 'none';
     }
@@ -389,7 +395,9 @@
 
     // Hero kaydırıldıkça yukarı kayar ve söner
     var heroInner = document.querySelector('.hero__inner');
-    if (heroInner) {
+    // Kaydırmaya bağlı (scrub) efektler yalnızca masaüstünde: telefonda parmakla
+    // kaydırırken kaydırma olayları seyrek geldiği için takılıp zıplıyorlar.
+    if (heroInner && !isTouch) {
         gsap.to(heroInner, {
             yPercent: -12,
             opacity: 0.25,
@@ -398,7 +406,7 @@
         });
     }
 
-    if (heroPhoto) {
+    if (heroPhoto && !isTouch) {
         gsap.to(heroPhoto, {
             yPercent: 18,
             ease: 'none',
@@ -450,7 +458,7 @@
         }
     });
 
-    document.querySelectorAll('[data-parallax]').forEach(function (img) {
+    if (!isTouch) document.querySelectorAll('[data-parallax]').forEach(function (img) {
         gsap.fromTo(img,
             { yPercent: -6, scale: 1.15 },
             {

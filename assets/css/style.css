@@ -1379,11 +1379,17 @@ button.cert__preview { cursor: pointer; }
 
     /* Menü telefonda alta, ekranın ortasına iner */
     .nav {
+        /* Ekranın altına sabit; kendi katmanında durur, kaydırmada titremez */
         position: fixed;
         left: 50%;
-        bottom: max(1rem, env(safe-area-inset-bottom));
-        transform: translateX(-50%);
+        bottom: calc(.75rem + env(safe-area-inset-bottom));
+        transform: translate3d(-50%, 0, 0);
+        will-change: transform;
+        backface-visibility: hidden;
     }
+
+    /* Telefonda açılış yazısı daha büyük */
+    .loader__name { font-size: 17vw; }
     .nav a { padding: .75rem .9rem; }
     .nav a .icon { display: block; }
     .nav a span { display: none; }
