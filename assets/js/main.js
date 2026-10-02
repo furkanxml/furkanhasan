@@ -191,17 +191,24 @@
             var errors = {};
             if (d.name.length < 2 || d.name.length > 80) errors.name = 'Adınızı yazın.';
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) || d.email.length > 120) errors.email = 'Geçerli bir e-posta adresi girin.';
+            if (d.phone && !/^\+?[0-9()\s-]{7,20}$/.test(d.phone)) errors.phone = 'Geçerli bir telefon numarası girin.';
             if (d.subject.length > 120) errors.subject = 'Konu en fazla 120 karakter olabilir.';
             if (d.message.length < 10) errors.message = 'Mesaj en az 10 karakter olmalı.';
             else if (d.message.length > 3000) errors.message = 'Mesaj en fazla 3000 karakter olabilir.';
             return errors;
         };
 
-        var tawkCall = function (method, args) {
+        var showInfo = function (text) {
+            statusBox.className = 'notice notice--info';
+            statusBox.textContent = text;
+            statusBox.hidden = false;
+        };
+
+        var tawkCall = function (method, args, timeoutMs) {
             return new Promise(function (resolve, reject) {
                 var api = window.Tawk_API;
-                if (!api || typeof api[method] !== 'function') { reject(new Error('Tawk hazır değil')); return; }
-                var timer = setTimeout(function () { reject(new Error('Tawk zaman aşımı')); }, 6000);
+                if (!api || typeof api[method] !== 'function') { reject(new Error('not-ready')); return; }
+                var timer = setTimeout(function () { reject(new Error('timeout')); }, timeoutMs);
                 api[method].apply(api, args.concat(function (err) {
                     clearTimeout(timer);
                     if (err) reject(err); else resolve();
@@ -209,15 +216,17 @@
             });
         };
 
-        var sendToTawk = function (d) {
-
-            var meta = { isim: d.name, email: d.email, konu: d.subject || '-' };
+        var sendToTawk = function (d, timeoutMs) {
+            var attrs = { name: d.name, email: d.email };
+            if (d.phone) attrs.telefon = d.phone;
+            var meta = { isim: d.name, email: d.email, telefon: d.phone || '-', konu: d.subject || '-' };
             for (var i = 0, part = 1; i < d.message.length; i += 240, part++) {
                 meta[part === 1 ? 'mesaj' : 'mesaj_' + part] = d.message.slice(i, i + 240);
             }
-            return tawkCall('setAttributes', [{ name: d.name, email: d.email }])
-                .catch(function () {  })
-                .then(function () { return tawkCall('addEvent', ['İletişim Formu', meta]); });
+            return Promise.all([
+                tawkCall('setAttributes', [attrs], timeoutMs).catch(function () {}),
+                tawkCall('addEvent', ['iletisim-formu', meta], timeoutMs)
+            ]);
         };
 
         var sendToServer = function () {
@@ -242,6 +251,7 @@
             var d = {
                 name: form.elements.namedItem('name').value.trim(),
                 email: form.elements.namedItem('email').value.trim(),
+                phone: form.elements.namedItem('phone').value.trim(),
                 subject: form.elements.namedItem('subject').value.trim(),
                 message: form.elements.namedItem('message').value.trim()
             };
@@ -258,24 +268,42 @@
             }
 
             submitBtn.disabled = true;
-            var jobs = [settle(sendToTawk(d))];
+            showInfo('Gönderiliyor…');
 
-            if (/\.php$/.test(form.getAttribute('action')) && window.fetch && window.FormData) jobs.push(settle(sendToServer()));
+            var api = window.Tawk_API;
+            var openedForConsent = false;
+            var serverJob = (/\.php$/.test(form.getAttribute('action')) && window.fetch && window.FormData)
+                ? settle(sendToServer()) : Promise.resolve(false);
 
-            Promise.all(jobs).then(function (results) {
-                if (results.indexOf(true) === -1) {
+            var done = function (ok) {
+                if (ok) {
+                    showStatus(true, 'Teşekkürler ' + d.name + ', mesajınız ulaştı. En kısa sürede döneceğim.');
+                    form.reset();
+                    if (openedForConsent && api && typeof api.minimize === 'function') api.minimize();
+                } else {
                     showStatus(false, 'Mesaj gönderilemedi. Doğrudan e-posta ile ulaşabilirsiniz: ' + (document.querySelector('.mailbox__address') || {}).textContent);
-                    return;
                 }
-                showStatus(true, 'Teşekkürler ' + d.name + ', mesajınız ulaştı. En kısa sürede döneceğim.');
-                form.reset();
+                submitBtn.disabled = false;
+            };
 
-                var api = window.Tawk_API;
-                if (results[0] && api && typeof api.getStatus === 'function' && api.getStatus() === 'online'
-                    && typeof api.maximize === 'function') {
-                    api.maximize();
-                }
-            }).then(function () { submitBtn.disabled = false; });
+            if (!api || typeof api.addEvent !== 'function') {
+                serverJob.then(done);
+                return;
+            }
+
+            var consentHint = setTimeout(function () {
+                openedForConsent = true;
+                showInfo('Son bir adım: açılan sohbet penceresinde kişisel verilerin kullanımına onay verin. Onayınızın ardından mesajınız otomatik olarak iletilecek.');
+                if (typeof api.maximize === 'function') api.maximize();
+            }, 2500);
+
+            sendToTawk(d, 180000).then(function () {
+                clearTimeout(consentHint);
+                done(true);
+            }, function () {
+                clearTimeout(consentHint);
+                serverJob.then(done);
+            });
         });
     }
 

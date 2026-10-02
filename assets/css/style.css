@@ -1119,6 +1119,7 @@ button.cert__preview { cursor: pointer; }
 }
 .notice .icon { margin-top: .15em; }
 .notice--ok { background: rgba(76, 207, 122, .14); color: #bff0cf; }
+.notice--info { background: rgba(59, 123, 255, .14); color: #cfe0ff; }
 .notice--err { background: rgba(255, 122, 122, .14); color: #ffd0d0; }
 
 .footer {
