@@ -1,38 +1,29 @@
-/*
- * Tawk.to canlı sohbet
- * Her sayfanın sonunda yüklenir. Mülk kimliği eski sitedeki (furkan-main) ile aynıdır.
- */
 (function () {
     'use strict';
 
     var TAWK_SRC = 'https://embed.tawk.to/69de5c966161b11c3321139b/1jm6j0ckt';
 
-    /* ---------- Sekme başlığını sabit tut ----------
-       Tawk okunmamış mesaj olunca sekme başlığını "(1) Yeni mesaj..." gibi
-       değiştirip yanıp söndürür. Başlığa yazmayı engelleyip eski hâline döndürüyoruz. */
     var originalTitle = document.title;
     try {
         var native = Object.getOwnPropertyDescriptor(Document.prototype, 'title');
         Object.defineProperty(document, 'title', {
             configurable: true,
             get: function () { return native.get.call(document); },
-            set: function () { /* Tawk'ın başlık değişikliklerini yok say */ }
+            set: function () {  }
         });
-    } catch (err) { /* eski tarayıcı: aşağıdaki gözlemci yeterli */ }
+    } catch (err) {  }
 
     if (window.MutationObserver) {
-        // <title> metni ya da etiketin kendisi değiştirilirse geri al
+
         new MutationObserver(function () {
             var el = document.querySelector('title');
             if (el && el.textContent !== originalTitle) el.textContent = originalTitle;
         }).observe(document.head, { childList: true, characterData: true, subtree: true });
     }
 
-    /* ---------- Tawk ayarları ---------- */
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
 
-    // Telefonda baloncuk alttaki menünün üstünde dursun
     window.Tawk_API.customStyle = {
         visibility: {
             desktop: { position: 'br', xOffset: 24, yOffset: 24 },
@@ -47,7 +38,6 @@
     s1.setAttribute('crossorigin', '*');
     document.body.appendChild(s1);
 
-    /* ---------- "Canlı sohbet" butonları ---------- */
     document.querySelectorAll('[data-chat-open]').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
             var api = window.Tawk_API;
@@ -55,7 +45,7 @@
                 e.preventDefault();
                 api.maximize();
             }
-            // Tawk henüz yüklenmediyse bağlantı normal çalışır (iletişim formuna gider)
+
         });
     });
 })();

@@ -1,6 +1,4 @@
-﻿/* =========================================================
-   Tokens
-   ========================================================= */
+﻿
 :root {
     --night: #070b1f;
     --night-2: #0d1433;
@@ -26,9 +24,6 @@
     --ease: cubic-bezier(.2, .7, .1, 1);
 }
 
-/* =========================================================
-   Base
-   ========================================================= */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
@@ -93,7 +88,6 @@ button { font: inherit; color: inherit; }
 }
 .skip:focus { top: .75rem; }
 
-/* Maskeli kelime ve harf açılışları */
 .w {
     display: inline-block;
     overflow: hidden;
@@ -111,7 +105,6 @@ button { font: inherit; color: inherit; }
 }
 .ch { display: inline-block; }
 
-/* Ortak tipografi */
 .eyebrow {
     display: inline-flex;
     align-items: center;
@@ -137,9 +130,6 @@ button { font: inherit; color: inherit; }
 .display--sm { font-size: clamp(2.5rem, 5.5vw, 5.5rem); }
 .display--ink { color: var(--ink); }
 
-/* =========================================================
-   Buttons
-   ========================================================= */
 .pill {
     display: inline-flex;
     align-items: center;
@@ -173,7 +163,6 @@ button { font: inherit; color: inherit; }
 
 .buttons { display: flex; flex-wrap: wrap; gap: .75rem; }
 
-/* Buzlu cam yüzey (header) */
 .glass {
     background: rgba(9, 14, 40, .5);
     -webkit-backdrop-filter: blur(18px) saturate(1.5);
@@ -209,9 +198,6 @@ button { font: inherit; color: inherit; }
 }
 .pill--glass:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* =========================================================
-   Loader
-   ========================================================= */
 .loader { display: none; }
 
 .js .loader {
@@ -230,9 +216,6 @@ button { font: inherit; color: inherit; }
     line-height: .9;
 }
 
-/* =========================================================
-   Top bar: ortada buzlu cam menü, kenarlar şeffaf
-   ========================================================= */
 .topbar {
     position: fixed;
     inset: 0 0 auto;
@@ -320,9 +303,6 @@ button { font: inherit; color: inherit; }
 
 html:not(.js) .topbar { color: #fff; }
 
-/* =========================================================
-   Hero
-   ========================================================= */
 .hero {
     position: relative;
     isolation: isolate;
@@ -336,7 +316,6 @@ html:not(.js) .topbar { color: #fff; }
     background: var(--night);
 }
 
-/* Yatay fotoğraf tüm giriş alanını kaplar; kişi sağda, sol taraf yazıya kalır */
 .hero__photo {
     position: absolute;
     z-index: -1;
@@ -350,7 +329,7 @@ html:not(.js) .topbar { color: #fff; }
     object-position: 66% 40%;
     filter: saturate(.9) contrast(1.05);
 }
-/* Mavi ton ve koyu geçişler */
+
 .hero__photo::before,
 .hero__photo::after {
     content: "";
@@ -394,18 +373,17 @@ html:not(.js) .topbar { color: #fff; }
 .wave { color: var(--accent-2); }
 
 .hero__title {
-    /* Kısa ekranlarda yüksekliğe göre de küçülür */
+
     font-size: clamp(3.4rem, min(13vw, 21vh), 15rem);
     font-weight: 800;
     font-stretch: 62%;
     line-height: .86;
     letter-spacing: -.01em;
 }
-/* İki katman üst üste: fotoğrafın başladığı yerde dolu yazı yumuşakça
-   çizgi yazıya dönüşür, böylece yüz harflerin arkasından görünür. */
+
 .hero__title {
     --title-left: max(var(--gutter), calc((100vw - 1520px) / 2 + var(--gutter)));
-    /* Kişinin başladığı yer: fotoğrafın yaklaşık %54'ü */
+
     --fade-from: calc(54vw - var(--title-left));
     --fade-to: calc(62vw - var(--title-left));
     display: grid;
@@ -476,15 +454,11 @@ html:not(.js) .topbar { color: #fff; }
     max-width: 32ch;
 }
 
-/* JS açılış durumları */
 .js .hero .ch,
 .js .project__title .ch { opacity: 0; }
 .js [data-hero-fade] { opacity: 0; }
 .js .hero__photo { clip-path: inset(100% 0 0 0); }
 
-/* =========================================================
-   Marquee
-   ========================================================= */
 .marquee {
     position: relative;
     z-index: 2;
@@ -526,9 +500,6 @@ html:not(.js) .topbar { color: #fff; }
 .marquee__logo img { width: 58%; height: 58%; }
 .marquee__sep { width: .7em; height: .7em; margin-left: .6rem; opacity: .7; }
 
-/* =========================================================
-   Work (projeler)
-   ========================================================= */
 .work {
     --bg: #132a63;
     position: relative;
@@ -612,7 +583,6 @@ html:not(.js) .topbar { color: #fff; }
 
 .work__outro { display: grid; gap: 2rem; justify-items: start; align-content: center; }
 
-/* Masaüstü: JS yatay kaydırmayı açar */
 .work.is-horizontal .work__pin {
     height: 100vh;
     overflow: hidden;
@@ -630,9 +600,6 @@ html:not(.js) .topbar { color: #fff; }
 .work.is-horizontal .card { width: min(58vw, 64vh * 2.08); }
 .work.is-horizontal .work__outro { width: 36vw; padding-right: 6vw; }
 
-/* =========================================================
-   About
-   ========================================================= */
 .about {
     position: relative;
     z-index: 1;
@@ -743,9 +710,6 @@ html:not(.js) .topbar { color: #fff; }
 }
 .facts__value { font-weight: 600; line-height: 1.25; }
 
-/* =========================================================
-   Skills
-   ========================================================= */
 .skills {
     padding-block: clamp(5rem, 10vw, 8rem);
     background: var(--paper-2);
@@ -813,9 +777,6 @@ html:not(.js) .topbar { color: #fff; }
 .skill-card__list li:hover { background: #fff; }
 .skill-card__list li:hover img { transform: scale(1.12) rotate(-6deg); }
 
-/* =========================================================
-   Certificates
-   ========================================================= */
 .certs {
     padding-block: clamp(5rem, 10vw, 8rem);
     background: var(--paper);
@@ -856,7 +817,6 @@ button.cert__preview { cursor: pointer; }
     object-position: top;
 }
 
-/* Tasarlanmış sertifika kapağı */
 .cert__paper {
     position: absolute;
     inset: 0;
@@ -905,7 +865,6 @@ button.cert__preview { cursor: pointer; }
 }
 .cert__by { font-size: .78rem; color: var(--muted); }
 
-/* PDF önizlemesi: JS ilk sayfayı canvas'a çizer, kapağın üstüne yerleşir */
 .cert__pdf {
     position: absolute;
     inset: 0;
@@ -956,7 +915,6 @@ button.cert__preview { cursor: pointer; }
 .cert__info span { display: inline-flex; align-items: center; gap: .4rem; }
 .cert__info .icon { color: var(--accent); width: 1rem; height: 1rem; }
 
-/* Sertifika penceresi */
 .modal {
     width: min(1100px, calc(100% - 2rem));
     height: min(88vh, 860px);
@@ -1015,9 +973,6 @@ button.cert__preview { cursor: pointer; }
     color: var(--on-dark-muted);
 }
 
-/* =========================================================
-   Contact
-   ========================================================= */
 .contact {
     padding-top: clamp(6rem, 12vw, 10rem);
     padding-bottom: clamp(4rem, 8vw, 6rem);
@@ -1098,7 +1053,6 @@ button.cert__preview { cursor: pointer; }
 
 .contact__social { display: flex; flex-wrap: wrap; gap: .6rem; }
 
-/* Form */
 .form {
     display: grid;
     gap: 1.75rem;
@@ -1167,9 +1121,6 @@ button.cert__preview { cursor: pointer; }
 .notice--ok { background: rgba(76, 207, 122, .14); color: #bff0cf; }
 .notice--err { background: rgba(255, 122, 122, .14); color: #ffd0d0; }
 
-/* =========================================================
-   Footer
-   ========================================================= */
 .footer {
     overflow: hidden;
     background: var(--night);
@@ -1224,9 +1175,6 @@ button.cert__preview { cursor: pointer; }
 }
 .footer__mark span { display: block; }
 
-/* =========================================================
-   Project page
-   ========================================================= */
 .is-inner { background: var(--paper); }
 
 .project__hero {
@@ -1361,9 +1309,6 @@ button.cert__preview { cursor: pointer; }
 }
 .notfound .wrap { display: grid; gap: 2rem; justify-items: start; }
 
-/* =========================================================
-   Responsive
-   ========================================================= */
 @media (max-width: 1180px) {
     .nav a { padding-inline: .8rem; }
     .topbar__cv { display: none; }
@@ -1377,11 +1322,8 @@ button.cert__preview { cursor: pointer; }
 @media (max-width: 899px) {
     .topbar { grid-template-columns: 1fr auto; }
 
-    /* Menü telefonda alta, ekranın ortasına iner */
     .nav {
-        /* Ekranın altına sabit; kendi katmanında durur, kaydırmada titremez.
-           Aşağı kaydırırken gizlenir, yukarı kaydırınca geri gelir (tarayıcının
-           kendi alt çubuğuyla aynı anda), böylece zıplama yerine kayma görünür. */
+
         position: fixed;
         left: 50%;
         bottom: calc(.75rem + env(safe-area-inset-bottom));
@@ -1396,7 +1338,6 @@ button.cert__preview { cursor: pointer; }
         pointer-events: none;
     }
 
-    /* Telefonda açılış yazısı daha büyük */
     .loader__name { font-size: 17vw; }
     .nav a { padding: .75rem .9rem; }
     .nav a .icon { display: block; }
@@ -1410,12 +1351,10 @@ button.cert__preview { cursor: pointer; }
 
     .hero { padding-bottom: 6.5rem; }
 
-    /* Başlığın altındaki ayırıcı çizgi telefonda yüzün üstünden geçiyordu */
     .hero__bottom { border-top: 0; padding-top: 0; }
 
     .hero__layer:first-child { -webkit-mask-image: none; mask-image: none; }
     .hero__layer--outline { display: none; }
-
 
     .hero__tags,
     .hero__cta { grid-column: 1 / -1; }

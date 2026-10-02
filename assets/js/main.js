@@ -3,7 +3,6 @@
 
     var root = document.documentElement;
 
-    // E-posta kopyalama (animasyonlardan bağımsız çalışır)
     document.querySelectorAll('[data-copy]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             if (!navigator.clipboard) return;
@@ -14,7 +13,6 @@
         });
     });
 
-    /* ---------- Sertifikalar: PDF'in ilk sayfası pdf.js ile çizilir ---------- */
     var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/';
     var pdfjsPromise = null;
     var pdfDocs = {};
@@ -49,7 +47,6 @@
         });
     }
 
-    // Kart önizlemeleri: kart görünür olunca yüklenir; hata olursa tasarlanmış kapak kalır
     var thumbs = document.querySelectorAll('[data-pdf]');
     if (thumbs.length && 'IntersectionObserver' in window) {
         var thumbObserver = new IntersectionObserver(function (entries) {
@@ -69,7 +66,6 @@
         thumbs.forEach(function (el) { thumbObserver.observe(el); });
     }
 
-    // Büyük önizleme penceresi
     var modal = document.getElementById('cert-modal');
     if (modal && typeof modal.showModal === 'function') {
         var pages = modal.querySelector('.modal__pages');
@@ -121,13 +117,12 @@
             if (window.__lenis) window.__lenis.start();
         });
     } else if (modal) {
-        // <dialog> desteklenmiyorsa PDF yeni sekmede açılır
+
         document.querySelectorAll('[data-cert-open]').forEach(function (btn) {
             btn.addEventListener('click', function () { window.open(btn.dataset.file, '_blank', 'noopener'); });
         });
     }
 
-    /* ---------- Telefonda alt menü: aşağı kaydırınca gizlen, yukarıda göster ---------- */
     (function () {
         var narrow = matchMedia('(max-width: 899px)');
         var lastY = window.scrollY;
@@ -138,7 +133,7 @@
             var y = window.scrollY;
             var delta = y - lastY;
             if (!narrow.matches) { root.classList.remove('nav-hidden'); lastY = y; return; }
-            if (Math.abs(delta) < 8) return;                      // küçük titreşimleri yok say
+            if (Math.abs(delta) < 8) return;
             var nearTop = y < 120;
             var nearEnd = window.innerHeight + y >= document.documentElement.scrollHeight - 60;
             root.classList.toggle('nav-hidden', delta > 0 && !nearTop && !nearEnd);
@@ -150,11 +145,6 @@
         }, { passive: true });
     })();
 
-    /* ---------- İletişim formu ----------
-       Mesaj Tawk.to'ya gönderilir: ad/e-posta ziyaretçiye tanımlanır, mesaj
-       "İletişim Formu" olayı olarak Tawk paneline/uygulamasına düşer.
-       Site GitHub Pages'te olduğu için PHP yoktur. Form action'ı bir .php dosyasına
-       çevrilirse mesaj oraya da gönderilir. JS kapalıysa form e-posta programını açar. */
     var form = document.querySelector('.form');
     if (form) {
         var statusBox = form.querySelector('[data-form-status]');
@@ -207,7 +197,6 @@
             return errors;
         };
 
-        // Tawk API'sindeki geri çağırmalı fonksiyonları Promise'e çevirir
         var tawkCall = function (method, args) {
             return new Promise(function (resolve, reject) {
                 var api = window.Tawk_API;
@@ -221,13 +210,13 @@
         };
 
         var sendToTawk = function (d) {
-            // Tawk olay alanları kısa metin kabul eder; uzun mesajı parçalara böl
+
             var meta = { isim: d.name, email: d.email, konu: d.subject || '-' };
             for (var i = 0, part = 1; i < d.message.length; i += 240, part++) {
                 meta[part === 1 ? 'mesaj' : 'mesaj_' + part] = d.message.slice(i, i + 240);
             }
             return tawkCall('setAttributes', [{ name: d.name, email: d.email }])
-                .catch(function () { /* ad/e-posta tanımlanamasa da olayı göndermeyi dene */ })
+                .catch(function () {  })
                 .then(function () { return tawkCall('addEvent', ['İletişim Formu', meta]); });
         };
 
@@ -262,7 +251,7 @@
                 showStatus(false, 'Lütfen işaretli alanları kontrol edin.');
                 return;
             }
-            if (form.elements.namedItem('website').value) { // bot tuzağı
+            if (form.elements.namedItem('website').value) {
                 showStatus(true, 'Teşekkürler, mesajınız ulaştı.');
                 form.reset();
                 return;
@@ -270,7 +259,7 @@
 
             submitBtn.disabled = true;
             var jobs = [settle(sendToTawk(d))];
-            // Sunucu tarafı yalnızca form bir PHP dosyasına gidiyorsa kullanılır
+
             if (/\.php$/.test(form.getAttribute('action')) && window.fetch && window.FormData) jobs.push(settle(sendToServer()));
 
             Promise.all(jobs).then(function (results) {
@@ -280,7 +269,7 @@
                 }
                 showStatus(true, 'Teşekkürler ' + d.name + ', mesajınız ulaştı. En kısa sürede döneceğim.');
                 form.reset();
-                // Mesaj Tawk'a gittiyse ve çevrimiçiysem sohbeti aç (eski sitedeki gibi)
+
                 var api = window.Tawk_API;
                 if (results[0] && api && typeof api.getStatus === 'function' && api.getStatus() === 'online'
                     && typeof api.maximize === 'function') {
@@ -297,13 +286,9 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    /* ---------- Sayfa her zaman en baştan açılır ----------
-       Yenilemede tarayıcının eski konuma ya da #bölüme atlamasını engeller.
-       Başka sayfadan "index.html#hakkimda" gibi bir bağlantıyla gelinirse,
-       düzen hazır olduktan sonra o bölüme gidilir. */
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     ScrollTrigger.clearScrollMemory('manual');
-    // Telefonda adres çubuğu açılıp kapanınca ölçüleri yeniden hesaplama (sayfa zıplamasın)
+
     ScrollTrigger.config({ ignoreMobileResize: true });
     var navEntry = performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
     var isReload = navEntry && navEntry.type === 'reload';
@@ -314,16 +299,11 @@
     }
     window.scrollTo(0, 0);
 
-    // Ziyaretçi kendisi kaydırmaya başlamadıysa, yükleme bitince de en başta kal
     var userScrolled = false;
     ['wheel', 'touchstart', 'keydown'].forEach(function (type) {
         window.addEventListener(type, function () { userScrolled = true; }, { once: true, passive: true });
     });
 
-    /* ---------- Yumuşak kaydırma ---------- */
-    // Telefon/tablette tarayıcının kendi kaydırması en akıcısıdır; Lenis yalnızca
-    // fare kullanılan cihazlarda açılır (dokunmatikte sabit öğelerin kaymasını önler).
-    // Dokunmatik cihaz mı? (telefon/tablet: fare yok)
     var isTouch = !matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     var lenis = null;
@@ -347,7 +327,7 @@
             immediate: !!immediate,
             force: true,
             onComplete: function () {
-                // Kaydırma sırasında düzen değiştiyse (görsel/yazı tipi yüklendi) tam yerine oturt
+
                 if (target !== 0 && Math.abs(target.getBoundingClientRect().top) > 2) {
                     lenis.scrollTo(target, { immediate: true, force: true });
                 }
@@ -371,18 +351,16 @@
         });
     });
 
-    /* ---------- Açılış ---------- */
     var loader = document.querySelector('.loader');
     var heroChars = document.querySelectorAll('.hero .ch, .project__title .ch');
     var heroFades = document.querySelectorAll('[data-hero-fade]');
     var heroPhoto = document.querySelector('.hero__photo');
     var intro = gsap.timeline({ defaults: { ease: 'expo.out' } });
-    // Açılış efekti her girişte oynar; yalnızca başka sayfadan bir bölüme
-    // (ör. index.html#hakkimda) gelinirken atlanır.
+
     var showLoader = !!loader && !pendingTarget;
 
     if (loader && showLoader) {
-        // Açılış bitene kadar sayfa kaydırılamaz
+
         if (lenis) lenis.stop();
         root.style.overflow = 'hidden';
         var loaderChars = loader.querySelectorAll('.ch');
@@ -416,10 +394,8 @@
         { opacity: 1, y: 0, stagger: 0.1, duration: 1.2 },
         '<0.4');
 
-    // Hero kaydırıldıkça yukarı kayar ve söner
     var heroInner = document.querySelector('.hero__inner');
-    // Kaydırmaya bağlı (scrub) efektler yalnızca masaüstünde: telefonda parmakla
-    // kaydırırken kaydırma olayları seyrek geldiği için takılıp zıplıyorlar.
+
     if (heroInner && !isTouch) {
         gsap.to(heroInner, {
             yPercent: -12,
@@ -437,7 +413,6 @@
         });
     }
 
-    /* ---------- Kaydırma animasyonları ---------- */
     document.querySelectorAll('[data-words]').forEach(function (el) {
         gsap.from(el.querySelectorAll('.w > span'), {
             yPercent: 115,
@@ -476,7 +451,7 @@
             { clipPath: fromLeft ? 'inset(0% 100% 0% 0%)' : 'inset(100% 0% 0% 0%)' },
             { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'expo.inOut' });
         if (fromLeft) {
-            // Fotoğraf perdeyle birlikte soldan kayarak gelir
+
             tl.fromTo(el.querySelector('img'), { xPercent: -25 }, { xPercent: 0, duration: 1.8, ease: 'expo.out' }, 0);
         }
     });
@@ -492,7 +467,6 @@
             });
     });
 
-    /* ---------- Projeler: yatay galeri ve renk geçişi ---------- */
     var work = document.querySelector('.work');
     if (work) {
         var track = work.querySelector('.work__track');
@@ -561,7 +535,6 @@
         });
     }
 
-    /* ---------- Kayan şerit: kaydırma hızına tepki verir ---------- */
     var marquee = document.querySelector('.marquee__track');
     var marqueeAnim = marquee && marquee.getAnimations ? marquee.getAnimations()[0] : null;
     if (lenis && marqueeAnim) {
@@ -571,7 +544,6 @@
         });
     }
 
-    /* ---------- Üst menü açık zeminlerde koyu renge geçer ---------- */
     var topbar = document.querySelector('.topbar');
     var lightTriggers = Array.prototype.map.call(document.querySelectorAll('[data-theme="light"]'), function (section) {
         return ScrollTrigger.create({
@@ -584,14 +556,12 @@
         });
     });
 
-    /* ---------- Logo yıldızı kaydırdıkça döner ---------- */
     gsap.to('.logo__mark', {
         rotation: 360,
         ease: 'none',
         scrollTrigger: { start: 0, end: 'max', scrub: 1 }
     });
 
-    /* ---------- Footer imzası ---------- */
     var mark = document.querySelector('.footer__mark span');
     if (mark) {
         gsap.from(mark, {
@@ -601,7 +571,6 @@
         });
     }
 
-    /* ---------- Mıknatıslı butonlar (yalnızca fare) ---------- */
     if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
         document.querySelectorAll('[data-magnetic]').forEach(function (el) {
             var mx = gsap.quickTo(el, 'x', { duration: 0.8, ease: 'elastic.out(1, 0.4)' });
@@ -615,7 +584,6 @@
         });
     }
 
-    /* ---------- Menü: aktif bölümün altında kayan mavi gösterge ---------- */
     var nav = document.querySelector('.nav');
     var indicator = nav && nav.querySelector('.nav__indicator');
     var current = null;
@@ -649,7 +617,6 @@
         ScrollTrigger.addEventListener('refresh', function () { if (current) moveIndicator(current); });
     }
 
-    /* ---------- Yazı tipleri ve görseller yüklenince ölçüleri yenile ---------- */
     var pageLoaded = new Promise(function (resolve) {
         if (document.readyState === 'complete') resolve();
         else window.addEventListener('load', resolve);
