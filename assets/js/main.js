@@ -127,6 +127,29 @@
         });
     }
 
+    /* ---------- Telefonda alt menü: aşağı kaydırınca gizlen, yukarıda göster ---------- */
+    (function () {
+        var narrow = matchMedia('(max-width: 899px)');
+        var lastY = window.scrollY;
+        var ticking = false;
+
+        var update = function () {
+            ticking = false;
+            var y = window.scrollY;
+            var delta = y - lastY;
+            if (!narrow.matches) { root.classList.remove('nav-hidden'); lastY = y; return; }
+            if (Math.abs(delta) < 8) return;                      // küçük titreşimleri yok say
+            var nearTop = y < 120;
+            var nearEnd = window.innerHeight + y >= document.documentElement.scrollHeight - 60;
+            root.classList.toggle('nav-hidden', delta > 0 && !nearTop && !nearEnd);
+            lastY = y;
+        };
+
+        window.addEventListener('scroll', function () {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }, { passive: true });
+    })();
+
     /* ---------- İletişim formu ----------
        Mesaj Tawk.to'ya gönderilir: ad/e-posta ziyaretçiye tanımlanır, mesaj
        "İletişim Formu" olayı olarak Tawk paneline/uygulamasına düşer.

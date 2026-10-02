@@ -1379,13 +1379,21 @@ button.cert__preview { cursor: pointer; }
 
     /* Menü telefonda alta, ekranın ortasına iner */
     .nav {
-        /* Ekranın altına sabit; kendi katmanında durur, kaydırmada titremez */
+        /* Ekranın altına sabit; kendi katmanında durur, kaydırmada titremez.
+           Aşağı kaydırırken gizlenir, yukarı kaydırınca geri gelir (tarayıcının
+           kendi alt çubuğuyla aynı anda), böylece zıplama yerine kayma görünür. */
         position: fixed;
         left: 50%;
         bottom: calc(.75rem + env(safe-area-inset-bottom));
         transform: translate3d(-50%, 0, 0);
         will-change: transform;
         backface-visibility: hidden;
+        transition: transform .5s var(--ease), opacity .35s ease;
+    }
+    .nav-hidden .nav {
+        transform: translate3d(-50%, calc(100% + 2.5rem), 0);
+        opacity: 0;
+        pointer-events: none;
     }
 
     /* Telefonda açılış yazısı daha büyük */
@@ -1401,6 +1409,9 @@ button.cert__preview { cursor: pointer; }
     }
 
     .hero { padding-bottom: 6.5rem; }
+
+    /* Başlığın altındaki ayırıcı çizgi telefonda yüzün üstünden geçiyordu */
+    .hero__bottom { border-top: 0; padding-top: 0; }
 
     .hero__layer:first-child { -webkit-mask-image: none; mask-image: none; }
     .hero__layer--outline { display: none; }
